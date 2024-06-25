@@ -6,12 +6,13 @@
         <header> 
             <nav>
                 <a style="color: black" href="../index.html"><img src="../images/logo.png" alt="Logo" style="width:100px;height:50px;"</a>
-                <a style="right:0;" href="chapters/chapter1.html">Chapter 1</a>
-                <a style="float:right">Chapter 2</a>
+                <a style="right:0;" href="chapter1.html">Chapter 1</a>
+                <a style="float: right;" href="chapter2.html">Chapter 2</a>
             </nav>
         </header>
     <body>
         <h1>Setting up your Project</h1>
+        <p>This will go over the basic format behind zig's build system and how to get a project started. If you already have an understanding of this, I would recommend going straight to the next chapter <a href="chapter2.html">Here</a></p>
         <p>Zig has many amazing ergonomic features that allow for getting started fast. The compiler has some amaing features that allow us to get going quick. Let get started by initializing a new project in zig. This can be done from the command line. After we make a new folder that we want to work in. We can then use this command.</p>
         <pre><code>
         mkdir zRogue-game
@@ -20,6 +21,75 @@
         </code></pre>
         <p>With these commands zig with generate a new file. There are several important ones that we will go over. Lets look at each of them</p>
         <img src="../images/zig-init.png" alt="File structure">
+        <p>First a source directory is made. There should be two files located in it: <code>main.zig & root.zig</code>. The main file is our primary entry point into the program. The root file is used as an example for building a library which we will see in the build.zig file. </p>
+        <p>The next item will be the <code>build.zig</code> file. This is a file that allows you to write the build instructions in zig. This is one of zig's super powers in my opinion. It provides powerful ways to instruct how things should be built conditionally. Lets take a look at what comes in this file!</p>
+        <pre><code>
+  const std = @import("std");
+  
+  pub fn build(b: *std.Build) void {
+      const target = b.standardTargetOptions(.{});
+  
+      const optimize = b.standardOptimizeOption(.{});
+  
+      const lib = b.addStaticLibrary(.{
+          .name = "zRogue-game",
+          .root_source_file = b.path("src/root.zig"),
+          .target = target,
+          .optimize = optimize,
+      });
+  
+      b.installArtifact(lib);
+  
+      const exe = b.addExecutable(.{
+          .name = "zRogue-game",
+          .root_source_file = b.path("src/main.zig"),
+          .target = target,
+          .optimize = optimize,
+      });
+  
+      b.installArtifact(exe);
+  
+      const run_cmd = b.addRunArtifact(exe);
+  
+      run_cmd.step.dependOn(b.getInstallStep());
+  
+      if (b.args) |args| {
+          run_cmd.addArgs(args);
+      }
+  
+      const run_step = b.step("run", "Run the app");
+      run_step.dependOn(&run_cmd.step);
+  
+      const lib_unit_tests = b.addTest(.{
+          .root_source_file = b.path("src/root.zig"),
+          .target = target,
+          .optimize = optimize,
+      });
+  
+      const run_lib_unit_tests = b.addRunArtifact(lib_unit_tests);
+  
+      const exe_unit_tests = b.addTest(.{
+          .root_source_file = b.path("src/main.zig"),
+          .target = target,
+          .optimize = optimize,
+      });
+  
+      const run_exe_unit_tests = b.addRunArtifact(exe_unit_tests);
+  
+      const test_step = b.step("test", "Run unit tests");
+      test_step.dependOn(&run_lib_unit_tests.step);
+      test_step.dependOn(&run_exe_unit_tests.step);
+  }
+        </code></pre>
+        <p>I've taken out the comments from this, but I would invite you to read through all the comments provided by default to get an understanding of what it each part does. As a high level overview:</p>
+        <pre><code>
+  const std = @import("std");
+        </code></pre>
+        <p>First we import the standard library. This is where all of our fun functions that we use to build the program are located.</p>
+        <pre><code>
+  pub fn build(b: *std.Build) void {
+        </code></pre>
+        <p>We then define a function that will be called from the cli.</p>
         <p>After running the code above we should have a window open with the title that we gave it. How exciting! Step one is all done. The next thing we need to do is to get something rendering on that screen. Thankfully zRogue does much of the heavy lifting for us. </p>
     </body>
 

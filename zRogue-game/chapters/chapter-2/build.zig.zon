@@ -1,0 +1,16 @@
+.{
+    .name = "chapter-1",
+
+    .version = "0.0.0",
+    .dependencies = .{
+        .zRogue = .{
+            .url = "https://github.com/CorySmith97/zRogue/archive/refs/tags/t3.tar.gz",
+            .hash = "1220ecb41379f34e01a3a1c0e8f6dc56a693f1b38419e2ab1db130451aa17af728eb",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}

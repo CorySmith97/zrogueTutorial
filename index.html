@@ -13,16 +13,21 @@
         </header>
         <div class="introduction">
         <h1>zRogue Roguelike Tutorial</h1>
-        <p>Welcome to the zRogue roguelike tutorial. This is a project that is designed to give new comers to zig a fun way to become familiar with the language. In addition to learning more about zig, this aims to help make a simple project that you can be proud of.</p>
+        <p>Welcome to the zRogue roguelike tutorial. This is a project that is designed to give new comers to zig a fun way to become familiar with the language. In addition to learning more about zig, this aims to help make a simple project that you can be proud of. This project was heavily inspired by <a href="https://bfnightly.bracketproductions.com/chapter_1.html">Roguelike Tutorial - In Rust</a>. Learning Rust with that tutorial ushered me into a lower level approach to programming as up until the point I built my first little game I had only worked in higher level languages such as python. I fell in love with the control over the system. However after spending a year working with Rust in small projects, I really was tired of some aspects of the Rust language. During this time, I started experimenting with other languages and came across Zig. The language was incredibly intuitive and was beautiful to me. Additionally, the community was fantastic. I wanted to share the experience I had learning Rust but in a language, that in my opinion, is more fun to work in. This is an attempt to provide that. It should be known that this project is a work in progress. The library is subject to change, and this tutorial may change radically over time.</p>
 
         <h3>Prerequisets</h3>
 
-        <p>In order to get started, there are several things that you will be needing. First you need to download the zig programming language. This can be done from here <a href="https://ziglang.org/">ziglang.com</a>. Several other things include libexpoy for our rendering, and compiled copy of SDL2.</p>
+        <p>In order to get started, there are several things that you will be needing. First you need to download the zig programming language. This can be done from here <a href="https://ziglang.org/">ziglang.com</a>. As of the time of writing this, zRogue is not compatible with windows. This will hopefully change soon, but I primarily work between mac and linux. Several other things include libexpoy for our rendering, and compiled copy of SDL2.</p>
 
         <h3>Extra Help</h3>
         <p>This tutorial expects you to understand the basics of programming. Additionally, there are topics that will not be spoken about very heavily. If you want to get a fast course introduction I highly recommend <a href="https://github.com/ratfactor/ziglings">Ziglings</a>. It is a very fast paced run through of Zig that teaches you most of the key words and 'zig' way of doing things. Additionally, if you have other questions or want to give feedback please do! You can email me at <a href="mailto: corysmith7991@gmail.com">HERE</a>.</p>
         <h3>Getting Started</h3>
-
+            <p>Zig can be installed via brew on Mac by simply running the following command.<pre><code>brew install zig</code></pre>
+            For linux, as far as I know you will need to install from the ziglang website. No package manager offers an easy installation. While installing a specific version is fine, we can do one better. There is a community made version manager for zig called <a href="https://github.com/marler8997/zigup">zigup</a>. This is the preferred way to manage zig installations. Click on the link above and download it. After downloading it you will need to add it to your path. Once it is in your path, you can download whatever version of zig you want and easily change between versions. For this tutorial we will be using zig 0.12.1. You can install this by running <code>zigup 0.12.1</code>.
+            </p>
+            <p>You should check to make sure you can run zig. Simple from the CLI run <code>zig</code>. You should see all the compiler options. You should see the following: </p>
+            <img src="images/zig-compiler-check.png" alt="zig compiler check"/>
+            <p>After you have the compiler working, you will need a zig LSP to get autocomplete. As a note, the LSP is still a work in progress and needs to be restarted frequently. I use neovim and <code>zls</code> is downloadable from there. In vscode you simply need to install the Zig extension from the extension store.</p>
         </div>
 
         <footer> 

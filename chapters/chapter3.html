@@ -54,8 +54,13 @@ pub fn cleanup() !void {
     _ = gpa.deinit();
 }
     </code></pre>
-    One thing to note is that zig requires you to handle return values. However if you want to ignore that result you can use the underscore to let the compiler know, we dont want to worry about this return value. Now we need to make a function that will create our map. We will start with a random array of items.
+    One thing to note is that zig requires you to handle return values. However if you want to ignore that result you can use the underscore to let the compiler know, we dont want to worry about this return value. Now we need to make a function that will create our map. We will start with a random array of items. One other important thing is we need a function that turns a x/y coordinate into a position in this array. That is our index function. 
     <pre><code>
+pub fn index(x: f32, y: f32) usize {
+    const idx = @as(usize, @intFromFloat((y * 80) + x));
+    return idx;
+}
+
 pub fn newMap() !std.ArrayList(TileTypes) {
     map = try std.ArrayList(TileTypes).initCapacity(state.allocator, 80 * 50);
 
@@ -110,5 +115,39 @@ pub fn init() !void {
    When we run this now you should get a nice little random map.
    <img src="../images/interesting-map.png" alt="More Interesting Map">
         </p>
+        <p>Now that we have a slightly more interesting map, we need to add collisions to our player. We will do this by adding a method on our struct. While not traditional OOP, zig does allow you to have methods attached to data structures, similar to what rust allows you to do with impl. In our state we can write a function that will check. We can go ahead an implement a collision function within our state struct. It will look like this.
+        <pre><code>
+ pub const State = struct {
+    player: Player,
+    allocator: std.mem.Allocator,
+    map: std.ArrayList(TileTypes),
+
+    pub fn tryToMove(self: *Self, delta_x: f32, delta_y: f32) void {
+        const destination_idx = index(self.player.pos.x + delta_x, self.player.pos.y + delta_y);
+        if (self.map.tiles.items[destination_idx] != TileTypes.Wall) {
+            self.player.pos.x = @min(79, @max(0, self.player.pos.x + delta_x));
+            self.player.pos.y = @min(49, @max(0, self.player.pos.y + delta_y));
+        }
+    }
+}
+        </code></pre>
+        We get the direction we are wanting to move to. If that direction is not a wall, we update the player position. If it is in the way, then we are not able to walk in that direction. This is about as simple as it gets for collision functions. One of the true beauties of a roguelike. Now we need to change all of our input functions to reflect our updated move function. This can be done as follows:
+        <pre><code>
+        pub fn input(event: *app.Event) !void {
+    if (event.isKeyDown(app.KEY_A)) {
+        state.tryToMove(-1, 0);
+    }
+    if (event.isKeyDown(app.KEY_D)) {
+        state.tryToMove(1, 0);
+    }
+    if (event.isKeyDown(app.KEY_W)) {
+        state.tryToMove(0, -1);
+    }
+    if (event.isKeyDown(app.KEY_S)) {
+        state.tryToMove(0, 1);
+    }
+}
+</code></pre>
+and with that we can officially walk about and not phase through walls! We are starting to get somewhere with our little roguelike. Next Chapter we will be working on dungeon generation so we can have rooms to explore.</p>
     </body>
 </html>

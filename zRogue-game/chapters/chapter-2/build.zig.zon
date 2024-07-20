@@ -4,8 +4,8 @@
     .version = "0.0.0",
     .dependencies = .{
         .zRogue = .{
-            .url = "https://github.com/CorySmith97/zRogue/archive/refs/tags/t3.tar.gz",
-            .hash = "1220ecb41379f34e01a3a1c0e8f6dc56a693f1b38419e2ab1db130451aa17af728eb",
+            .url = "https://github.com/CorySmith97/zRogue/archive/refs/tags/v0.1.0.tar.gz",
+            .hash = "1220d330dfaff8f8733aa021c1d70c67a519e260efe7b8b4c58e791fcb1a9ffa3c51",
         },
     },
     .paths = .{

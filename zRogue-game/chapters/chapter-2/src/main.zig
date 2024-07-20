@@ -99,7 +99,7 @@ fn init() !void {
     };
 }
 
-fn tick() void {
+fn tick() !void {
     state.drawMap();
     s.drawSprite(
         state.player.x,
@@ -110,7 +110,7 @@ fn tick() void {
     );
 }
 
-pub fn input(event: *app.Event) void {
+pub fn input(event: *app.Event) !void {
     if (event.isKeyDown(app.KEY_A)) {
         state.player.x -= 1;
     }

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <link rel="stylesheet" href="../style/main.css">
+    </head>
+        <header> 
+            <nav>
+                <a style="color: black" href="../index.html"><img src="../images/logo.png" alt="Logo" style="width:100px;height:50px;"</a>
+                <a style="right:0;" href="chapter1.html">Chapter 1</a>
+                <a style="float: right;" href="chapter2.html">Chapter 2</a>
+                <a style="float: right;" href="chapter3.html">Chapter 3</a>
+            </nav>
+        </header>
+    <body>
+        <h1>Making A More Interesting Map</h1>
+        <p>Having a character walking around is pretty cool, however not having a map or anything to walk around to is pretty boring. Lets add some background stuff in our map. To start off we need to define what types of tiles we can have in our world. Zig provides enums which are similar to those found in languages such as C or Rust. We will make an enum of the tiletypes to get started.
+        <pre><code>
+const TileTypes = enum {
+    Wall,
+    Floor,
+};
+    </code></pre>
+    We will begin with only these two types. Now we need a way to store our data for our map. Zig provides the ability to have dynamic arrays with the ArrayList type from the standard library. We need to make sure we are importing the standard library, and then afterward we can create a struct where we will track all of our global state. Lets create a new struct called State.
+        <pre><code>
+ pub const State = struct {
+    player: Player,
+    allocator: std.mem.Allocator,
+    map: std.ArrayList(TileTypes),
+};
+    </code></pre>
+    There are several things of note here that we will need to remember. Zig is a system level language. Unlike a language such as Python which allocates memory for you, we are required to do that ourselves. It will be useful to attach an allocator to our struct if we ever need to pass an allocator to any other data. Moving to our init function we will need to make some changes. We will start by making a our state struct that we will make global. We can also remove the <code>var player: Player = undefined;</code> as our global state now holds that data. We also initial our allocator in global scope. We do this in order to avoid memory leaks as we need to properly destory the allocator at the end of our code. Because of need of cleanup, zRogue has a fourth function we can create and run called cleanup. We will add that as well.
+    <pre><code>
+var state: State = undefined;
+var gpa: std.heap.GeneralPurposeAllocator(.{}) = undefined;
+
+pub fn init() !void {
+    gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
+
+    state = .{
+        .player = .{
+            .x = 10,
+            .y = 10,
+            .foreground_color = s.TEAL,
+            .background_color = s.BLACK,
+            .sprite = '@',
+        },
+        .allocator = allocator,
+        .map = ???
+
+    };
+}
+pub fn cleanup() !void {
+    _ = gpa.deinit();
+}
+    </code></pre>
+    One thing to note is that zig requires you to handle return values. However if you want to ignore that result you can use the underscore to let the compiler know, we dont want to worry about this return value. Now we need to make a function that will create our map. We will start with a random array of items.
+    <pre><code>
+pub fn newMap() !std.ArrayList(TileTypes) {
+    map = try std.ArrayList(TileTypes).initCapacity(state.allocator, 80 * 50);
+
+    for (0..(80 * 50)) |i| {
+        try map.insert(i, TileTypes.Floor);
+    }
+
+    var x: f32 = 0;
+    while (x < 80) : (x += 1) {
+        map.items[index(x, 0)] = TileTypes.Wall;
+        map.items[index(x, 49)] = TileTypes.Wall;
+    }
+    var y: f32 = 0;
+    while (y < 50) : (y += 1) {
+        map.items[index(0, y)] = TileTypes.Wall;
+        map.items[index(79, y)] = TileTypes.Wall;
+    }
+
+    const rand = app.rng.random();
+
+    var i: f32 = 0;
+    while (i < 400) : (i += 1) {
+        const rand_x = rand.float(f32) * 79.0;
+        const rand_y = rand.float(f32) * 49.0;
+        const rand_idx = index(rand_x, rand_y);
+        if (rand_idx != index(40, 25)) {
+            map.items[rand_idx] = TileTypes.Wall;
+        }
+    }
+
+    return map;
+}
+    </code></pre>
+    Now with this we can go back to our init function and add our map to our initialization.
+    <pre><code>
+pub fn init() !void {
+    ...
+    state = .{
+        .player = .{
+            .x = 10,
+            .y = 10,
+            .foreground_color = s.TEAL,
+            .background_color = s.BLACK,
+            .sprite = '@',
+        },
+        .allocator = allocator,
+        .map = try newMap() 
+
+    };
+}
+   </code></pre>
+   When we run this now you should get a nice little random map.
+   <img src="../images/interesting-map.png" alt="More Interesting Map">
+        </p>
+    </body>
+</html>

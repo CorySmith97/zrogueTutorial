@@ -8,10 +8,126 @@
                 <a style="color: black" href="../index.html"><img src="../images/logo.png" alt="Logo" style="width:100px;height:50px;"</a>
                 <a style="right:0;" href="chapter1.html">Chapter 1</a>
                 <a style="float: right;" href="chapter2.html">Chapter 2</a>
+                <a style="float: right;" href="chapter3.html">Chapter 3</a>
             </nav>
         </header>
     <body>
         <h1>Creating a Map & Player</h1>
+        <p>Now that we have a window up and running, we need to get some new stuff rendering. zRogue provides a method to draw ascii characters out of the box. This is done by defining what cell we want to draw with. As of now, the grid is always 80x50 cells that we can fill. Lets go ahead and try it out. We need first import the module from zRogue. This can be done with the following. <pre><code>
+const app = @import("zRogue");
+const run = app.run;
+const s = app.Sprite;
+</code></pre></p>
+<p>Now with access to the sprite module, we need to set up some extra functions, that we will pass to our run function. zRogue has 4 seperate functions that users can define and then use as need be. This should be where all of our interactions live. They will always be called in this order.</p>
+<table>
+    <td>init</td>
+    <td>events</td>
+    <td>tick</td>
+    <td>cleanup</td>
+</table>
+<p>Init happens before we start running our main loop. This will be where we will initial global state. This should only be used for initialization and not anything else. Running logic here happens before we even open a window, and because of that it will only run one time. Events in the part of our update loop where we will process user input. There is an Events interface that will give us access to check if keys are being pressed. Tick is our main render loop as well as if we need to run any logic each frame. Lastly cleanup is where we will free our memory. We are going to start with just the tick function first. Lets go ahead and make a function.</p>
+<pre><code>
+pub fn tick() !void {
+    
+}
+</code></pre>
+<p>Several important things to remember. This function takes no parameters, and it must be made public in order to zRogue to make use of it. The exclamation before the void denotes that this function can throw an error. here is one of Zig's superpowers in my opinion. Errors as values are amazing. This can be viewed as <code>This function either returns an anyerror, or it will return nothing</code>. This gives us a lot of help when debugging. Lets start by writing an error to see what would happen.</p>
+<pre><code>
+pub fn tick() !void {
+    return error.ThisIsAVeryBadError;
+}
+</code></pre>
+<p>When we run this code we get the following output.</p>
+<img src="../images/Error.png" alt="Zig error" />
+<p>We can see the error it throws in the error that we wrote. That is awesome! We get to defined what exactly will happen if an error occurs. That to me is the best version of error handling. The stack also unwraps and will show us where the error occured, so we can go to the line of code quickly to debug.</p>
+<p>Moving onto our next section, we can delete that error, and go ahead and draw a sprite. The sprite module we added earlier provides a draw sprite function we can call. Here is a snippet of code how we would draw something. The function takes several parameters. The x and y positions we want. It is important to note, (0,0) is the top left section of the screen. Then we have the foreground color, as well as the background color. zRogue provides colors for us, but if you want to use your own color, you can as well! </p>
+<pre><code>
+pub fn tick() !void {
+    //            X   Y  Front      Back  Ascii Character
+    //            |   |      |      |      |
+    //            V   V      V      V      V
+    s.drawSprite(10, 10, s.TEAL, s.BLACK, '@');
+
+    // With Customer colors
+    s.drawSprite(
+        20, 
+        10, 
+        .{ .r = 1.0, .g = 0.2, .b =  0.4}, 
+        .{ .r = 1.0, .g = 1.0, .b =  1.0}, 
+        '@',
+
+    );
+}
+</code></pre>
+<p>All the colors are a 0-1 float. You must define red green and blue for the colors. Now we need to make sure run gets this function. In our main function lets all the following: 
+        <pre><code>
+pub fn main() !void {
+    try app.run(.{
+        .title = "Draw Sprite"
+        .tick = tick,
+    });
+}
+        </code></pre>
+        Now we can click run and we will get 2 characters drawing on the screen.</p>
+<img src="../images/first-sprites.png" alt="First sprite" />
+        <p>That's pretty awesome! The next step is to have one of these sprites be a player and make it so we can move. We will create a player struct that we will use to store position as well as colors for our sprite. We can do this at the top of the file. We will write the following.
+        <pre><code>
+const Player = struct {
+    x: i32,
+    y: i32,
+    foreground_color: s.Color,
+    background_color: s.Color,
+    sprite: u8,
+};
+    </code></pre>
+    A struct is a sequence of data that is represented in contiguous memory. In memory each item will be right after one another. This is our custom Player data type. We now need to initial a player. To start we will create an init function. This follows the exact same format as the tick function. In this we will make a player. However, we need to make our player global so we can access it in all of our functions. In Zig in order to have an uninitialized variable, it has to have a type. It looks like this.
+    <pre><code>
+var player: Player = undefined;
+    </code></pre>
+    With this we can now define the player in our init function and all other functions can see this. It is now global state, which is not necessarily great, but for our simple usecase here its fine. Next in init we need to give some values to our player.
+    <pre><code>
+pub fn init() !void {
+    player = .{
+        .x = 10,
+        .y = 10,
+        .foreground_color = s.TEAL,
+        .background_color = s.BLACK,
+        .sprite = '@',
+    };
+}
+    </code></pre>
+    There is a lot that this does. Zig allows you to use what is called array initialization. If a variable is already of known type, we can use <code>.{}</code> to populate the fields of that type. We then use the <code>.</code> to access the members of the struct. We must initialize all the fields, but at the end we have a player data type. One other thing is the char datatype is simply a u8. It is used to look up ascii characters for strings. This is slightly different than what we may find in other languages. We can now use it to draw code. Lets go back to our tick function and use the player data instead of the arbitrary data.
+<pre><code>
+pub fn tick() !void {
+    s.drawSprite(player.x, player.y, player.foreground_color, 
+        player.background, player.sprite);
+}
+</code></pre>
+    Now we can draw our player character. Next we need to get our little sprite moving! To get player input we will start with making our events function. 
+<pre><code>
+pub fn events(event: *app.Event) !void {
+}
+</code></pre>
+    This function has a non-optional parameter that allows us get user interface. Don't worry too much about the events. It is quite easy to use. We will check if a key is pressed, and if it is we will then change the player's position.
+<pre><code>
+pub fn events(event: *app.Event) !void {
+    if (event.isKeyDown(app.KEY_A)) {
+        player.x -= 1;
+    }
+    if (event.isKeyDown(app.KEY_D)) {
+        player.x += 1;
+    }
+    if (event.isKeyDown(app.KEY_W)) {
+        player.y -= 1;
+    }
+    if (event.isKeyDown(app.KEY_S)) {
+        player.y += 1;
+    }
+
+}
+</code></pre>
+Pay attention that to go up we subtract. In zRouge, (0,0) is the top left corner for now. This may change in the future however but for the meantime it is important to pay attention to that. If you run now you can move your sprite around the grid world. With that we will end this chapter.</p>
+    
     </body>
 
 </html>
